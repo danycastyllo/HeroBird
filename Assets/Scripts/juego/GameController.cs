@@ -122,16 +122,14 @@ public class GameController : MonoBehaviour {
 
 	void GameOver ()
 	{
-		if (Sonido.NunSoun == 1) {
-			GetComponent<AudioSource> ().Play ();
-		}
+		FindAnyObjectByType<AudioManager>().Play("Cuack"); // death sound
 		animBird = false;
 		StartCoroutine (restartt ());
 		CancelInvoke ("metr");
 		state = State.GameOver;
-		//Tramp[2].SetActive(false);
-		//ScrollObject[] scrollObjects = GameObject.FindObjectsOfType<ScrollObject>();
-		//foreach (ScrollObject so in scrollObjects) so.enabled = false;
+		monedas += monedasDePartida; // suma las monedas ganadas en la partida al total de monedas obtenidas
+		PlayerPrefs.SetFloat ("monedas", monedas); // guarda el acumulado de monedas (en playerprefs)
+
 		if (Score > record) {
 			record = Score;
 			PlayerPrefs.SetFloat ("record", record);

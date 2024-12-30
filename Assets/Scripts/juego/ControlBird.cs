@@ -44,9 +44,8 @@ public class ControlBird : MonoBehaviour {
 		if (Input.GetButtonDown ("Fire1") && transform.position.y < maxHeight) {
 
 			if (Aleteo == true) {
-				if(Sonido.NunSoun == 1){
-				GetComponent<AudioSource> ().Play ();
-				}
+				// flutter sound
+				FindAnyObjectByType<AudioManager>().Play("Flutter");
 			}
 			Flap ();
 		} else {
@@ -63,7 +62,7 @@ public class ControlBird : MonoBehaviour {
 		if(rb2d.isKinematic) return;
 
 		// Velocity를 직접 바꿔 써서 위쪽 방향으로 가속
-		rb2d.velocity = new Vector2(0.0f, flapVelocity);
+		rb2d.linearVelocity = new Vector2(0.0f, flapVelocity);
 	}
 
 	void ApplyAngle ()
@@ -78,7 +77,7 @@ public class ControlBird : MonoBehaviour {
 		else
 		{
 			targetAngle = 
-				Mathf.Atan2(rb2d.velocity.y, relativeVelocityX) * Mathf.Rad2Deg;
+				Mathf.Atan2(rb2d.linearVelocity.y, relativeVelocityX) * Mathf.Rad2Deg;
 		}
 
 		// 회전 애니메이션을 스무딩

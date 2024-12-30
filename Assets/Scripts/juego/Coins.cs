@@ -6,6 +6,7 @@ public class Coins : MonoBehaviour {
 
 	public bool MonedaC;
 	private Animator coin;
+	public AudioClip coinSound;
 	// Use this for initialization
 	void Start () {
 		Sonido.NunSoun = PlayerPrefs.GetInt ("Son");
@@ -13,25 +14,24 @@ public class Coins : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (MonedaC) {
-			coin.SetBool ("Cojida", MonedaC);
-			StartCoroutine(coinsEnun());
-		}
-	}
+	private void CollectCoin()
+    {
+	    
+		AudioPool.Instance.PlaySound(coinSound); // intancia la funcion que crea el numero de objetos para los audios de las monedas
+		GameController.monedasDePartida += 1f; // aumenta el contador de monedas obtenidas en la partida actual
+
+		// activa la animacion de obtencion de la moneda y luego la destruye
+		MonedaC = true;
+		coin.SetBool ("Cojida", MonedaC);
+		StartCoroutine(coinsEnun());
+    }
 	void OnTriggerEnter2D(Collider2D ColM){
 		if (ColM.gameObject.name == "Bird") {
-			if (Sonido.NunSoun == 1) {
-				GetComponent<AudioSource> ().Play ();
-			}
-			MonedaC = true;
-			GameController.monedas += 1f;
-			GameController.monedasDePartida += 1f;
-			PlayerPrefs.SetFloat ("monedas", GameController.monedas);
+			CollectCoin();
 		}
 	}
 	IEnumerator coinsEnun(){
-		yield return new WaitForSeconds (0.30f);
+		yield return new WaitForSeconds (0.40f);
 		Destroy (gameObject);
 	}
 }
