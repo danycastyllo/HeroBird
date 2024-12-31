@@ -5,10 +5,8 @@ using UnityEngine;
 public class Volver : MonoBehaviour {
 
 	public GameObject desaparecer;
-	public GameObject Opcion1;
 	public GameObject juego;
 	public Animator opcion;
-	bool quit;
 	public static bool ejecu;
 	// Use this for initialization
 	void Start () {
@@ -17,7 +15,6 @@ public class Volver : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		opcion.SetBool ("volver", quit);
 	}
 	void OnMouseDown(){
 		if (Ajustes.segur) {
@@ -28,9 +25,13 @@ public class Volver : MonoBehaviour {
 	IEnumerator volv(){
 		yield return new WaitForSeconds (0.10f);
 		ejecu = true;
+		opcion.SetBool ("volver", ejecu);
 		transform.localScale = new Vector3 (1f, 1f, 1f);
-		Opcion1.SetActive (true);
 		juego.SetActive (true);
+		
+		yield return new WaitForSeconds (1f);
+		opcion.Rebind(); // restaura el Animator a su estado inicial (restablece todos los parámetros a sus valores predeterminados)
 		desaparecer.SetActive (false);
+
 	}
 }

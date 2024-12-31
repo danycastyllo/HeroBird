@@ -5,7 +5,6 @@ using UnityEngine;
 public class Ajustes : MonoBehaviour {
 
 	public GameObject Opciones;
-	public GameObject Opciones1;
 	public GameObject juego;
 	public static bool segur;
 	// Use this for initialization
@@ -38,7 +37,6 @@ public class Ajustes : MonoBehaviour {
 	}
 	IEnumerator termi(){
 		yield return new WaitForSeconds (0.97f);
-		Opciones1.SetActive (false);
 		segur = false;
 	}
 }

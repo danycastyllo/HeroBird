@@ -17,16 +17,12 @@ public class Click : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (buy & clic) {
-			if (Sonido.NunSoun == 1) {
-				GetComponent<AudioSource> ().clip = buyy;
-				GetComponent<AudioSource> ().Play ();
-			}
+			GetComponent<AudioSource> ().clip = buyy;
+			GetComponent<AudioSource> ().Play ();
 			
 		} else if (buy = false & clic) {
-			if (Sonido.NunSoun == 1) {
-				GetComponent<AudioSource> ().clip = selec;
-				GetComponent<AudioSource> ().Play ();
-			}
+			GetComponent<AudioSource> ().clip = selec;
+			GetComponent<AudioSource> ().Play ();
 		}
 	}
 }

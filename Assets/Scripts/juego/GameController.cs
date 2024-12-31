@@ -42,6 +42,8 @@ public class GameController : MonoBehaviour {
 		sali = Random.Range (30f, 50f);
 		monedas = PlayerPrefs.GetFloat ("monedas");
 		record = PlayerPrefs.GetFloat ("record");
+		print(PlayerPrefs.GetInt ("Sound"));
+		AudioListener.volume = PlayerPrefs.GetInt ("Sound"); // devuelve el playerprefs del sonido para determinar si esta mute
 	}
 	
 	// Update is called once per frame

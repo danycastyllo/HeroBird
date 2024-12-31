@@ -9,7 +9,6 @@ public class Coins : MonoBehaviour {
 	public AudioClip coinSound;
 	// Use this for initialization
 	void Start () {
-		Sonido.NunSoun = PlayerPrefs.GetInt ("Son");
 		coin = GetComponent<Animator> ();
 	}
 	
