@@ -16,7 +16,6 @@ public class GameController : MonoBehaviour {
 	State state;
 
 	public ControlBird birdScript;
-	public Alerta alert;
 	public GameObject[] Tramp;
     public GameObject[] Gameover;
 	public static bool animBird = false;

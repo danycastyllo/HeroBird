@@ -15,7 +15,6 @@ public class SiguienteFila : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        print(SaveBird.SeccNum);
     }
 	void OnMouseDown(){
 		SaveBird.SeccNum = Num;

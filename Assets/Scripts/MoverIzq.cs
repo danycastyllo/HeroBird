@@ -20,10 +20,7 @@ public class MoverIzq : MonoBehaviour
     {
         if (ColM.gameObject.name == "Bird")
         {
-            if (Sonido.NunSoun == 1)
-            {
-                GetComponent<AudioSource>().Play();
-            }
+            GetComponent<AudioSource>().Play();
             GameController.Score += 1f;
         }
     }
