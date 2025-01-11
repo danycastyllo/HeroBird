@@ -35,7 +35,6 @@ public class BirdPoop : MonoBehaviour {
 			poops.SetActive (true);
 			birds.SetActive (false);
 		}
-        SaveBird.SeccNum = 0;
-        SavePoop.SeccPoop = 0;
+        GameController.SeccNum = 0;
 	}
 }

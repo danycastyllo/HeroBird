@@ -59,7 +59,7 @@ public class ControlBird : MonoBehaviour {
 		volar = true;
 		if(isDead) return;
 		// 중력을 받지 않을 때는 조작하지 않는다
-		if(rb2d.isKinematic) return;
+		if (rb2d.bodyType == RigidbodyType2D.Kinematic) return;
 
 		// Velocity를 직접 바꿔 써서 위쪽 방향으로 가속
 		rb2d.linearVelocity = new Vector2(0.0f, flapVelocity);
@@ -108,6 +108,6 @@ public class ControlBird : MonoBehaviour {
 
 	public void SetSteerActive (bool active)
 	{
-		rb2d.isKinematic = !active;
+		rb2d.bodyType = active ? RigidbodyType2D.Dynamic : RigidbodyType2D.Kinematic;
 	}
 }

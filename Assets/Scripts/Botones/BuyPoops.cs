@@ -7,15 +7,10 @@ public class BuyPoops : MonoBehaviour {
 	public float Precio;
 	public int NumPoop;
 
-	public SavePoop guarPoop;
-	public GameObject sonido;
-
 	// Use this for initialization
 	void Start () {
-		if (guarPoop.Poop [NumPoop] != null) {
-			if (guarPoop.Poop[NumPoop] == 1) {
-				Destroy (gameObject);
-			}
+		if (PlayerPrefs.GetInt ("poop" + NumPoop, 0) == 1) {
+			Destroy (gameObject);
 		}
 	}
 
@@ -25,11 +20,10 @@ public class BuyPoops : MonoBehaviour {
 	}
 	void OnMouseDown(){
 		if (GameController.monedas > Precio) {
-			guarPoop.Poop [NumPoop] = 1;
-			PlayerPrefs.SetInt ("poop" + NumPoop, guarPoop.Poop [NumPoop]);
+			PlayerPrefs.SetInt ("poop" + NumPoop, 1);
 			Destroy (gameObject);
 		} else {
-			print ("no Tiegnes Suficiente Dinero");
+			print ("no Tienes Suficiente Monedas");
 		}
 	}
 }

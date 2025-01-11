@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CambiaNivel : MonoBehaviour {
 
@@ -74,6 +75,6 @@ public class CambiaNivel : MonoBehaviour {
         finbird.SetActive(false);
         endgame.SetActive(true);
         yield return new WaitForSeconds(1.19f);
-        Application.LoadLevel(2);
+        SceneManager.LoadScene("Final");
     }
 }

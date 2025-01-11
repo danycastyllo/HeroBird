@@ -22,7 +22,6 @@ public class GameController : MonoBehaviour {
 
 	float sali;
 	public static float Score = 0;
-	float Por = 1;
 	public static float record = 0; 
 	public static float monedas = 0;
 	public static float monedasDePartida = 0;
@@ -35,13 +34,17 @@ public class GameController : MonoBehaviour {
 	public TextMesh marcadorOver;
 	public TextMesh monedasOver;
 
+	public SpriteRenderer SelectedBird; //the current skin of the selected bird
+	public SpriteRenderer SelectedPoop; //the current skin of the selected poop
+	public static int SeccNum;
+
+
 	// Use this for initialization
 	void Start () {
         Menu ();
 		sali = Random.Range (30f, 50f);
 		monedas = PlayerPrefs.GetFloat ("monedas");
 		record = PlayerPrefs.GetFloat ("record");
-		print(PlayerPrefs.GetInt ("Sound"));
 		AudioListener.volume = PlayerPrefs.GetInt ("Sound"); // devuelve el playerprefs del sonido para determinar si esta mute
 	}
 	

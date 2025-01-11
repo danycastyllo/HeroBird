@@ -17,7 +17,7 @@ public class SiguienteFila : MonoBehaviour {
     void Update () {
     }
 	void OnMouseDown(){
-		SaveBird.SeccNum = Num;
+		GameController.SeccNum = Num;
         // desactivando todas las filas
         Secc[0].GetComponent<CircleCollider2D>().enabled = true;
         Secc[1].GetComponent<CircleCollider2D>().enabled = true;
@@ -35,8 +35,8 @@ public class SiguienteFila : MonoBehaviour {
         Seccion[3].SetActive(false);
         Seccion[4].SetActive(false);
         // activando la seleccionada
-        Seccion[SaveBird.SeccNum].SetActive (true);
-		Secc [SaveBird.SeccNum].transform.localScale = new Vector2 (1f, 1f);
-		Secc [SaveBird.SeccNum].GetComponent<CircleCollider2D> ().enabled = false;
+        Seccion[GameController.SeccNum].SetActive (true);
+		Secc [GameController.SeccNum].transform.localScale = new Vector2 (1f, 1f);
+		Secc [GameController.SeccNum].GetComponent<CircleCollider2D> ().enabled = false;
 	}
 }

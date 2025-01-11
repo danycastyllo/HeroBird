@@ -6,16 +6,11 @@ public class BuyBirrds : MonoBehaviour {
 
 	public float Precio;
 	public int NumBird;
-	public GameObject sonido;
-
-	public SaveBird guarBird;
 
 	// Use this for initialization
 	void Start () {
-		if (guarBird.Bird [NumBird] != null) {
-			if (guarBird.Bird [NumBird] == 1) {
-				Destroy (gameObject);
-			}
+		if (PlayerPrefs.GetInt ("bird" + NumBird, 0) == 1) {
+			Destroy (gameObject);
 		}
 	}
 	
@@ -24,14 +19,13 @@ public class BuyBirrds : MonoBehaviour {
 		
 	}
 	void OnMouseDown(){
-		if (GameController.monedas > Precio) {
-			guarBird.Bird [NumBird] = 1;
-			PlayerPrefs.SetInt ("bird" + NumBird, guarBird.Bird [NumBird]);
+		if (GameController.monedas >= Precio) {
+			PlayerPrefs.SetInt ("bird" + NumBird, 1);
 			GameController.monedas -= Precio;
 			Destroy (gameObject);
 			PlayerPrefs.SetFloat ("monedas", GameController.monedas);
         } else {
-			print ("no Tiegnes Suficiente Dinero");
+			print ("No Tienes Suficiente Monedas");
 		}
 	}
 }

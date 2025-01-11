@@ -19,7 +19,7 @@ public class SigienteFilaPoop : MonoBehaviour {
 		
 	}
 	void OnMouseDown(){
-		SaveBird.SeccNum = Nump;
+		GameController.SeccNum = Nump;
         // desactivando todas las filas
         Seccp[0].transform.localScale = new Vector2(0.6f, 0.6f);
         Seccp[1].transform.localScale = new Vector2(0.6f, 0.6f);
@@ -31,8 +31,8 @@ public class SigienteFilaPoop : MonoBehaviour {
         Seccionp[1].SetActive(false);
         Seccionp[2].SetActive(false);
         // activando la seleccionada
-        Seccionp[SaveBird.SeccNum].SetActive (true);
-		Seccp [SaveBird.SeccNum].transform.localScale = new Vector2 (1f, 1f);
-		Seccp [SaveBird.SeccNum].GetComponent<CircleCollider2D> ().enabled = false;
+        Seccionp[GameController.SeccNum].SetActive (true);
+		Seccp [GameController.SeccNum].transform.localScale = new Vector2 (1f, 1f);
+		Seccp [GameController.SeccNum].GetComponent<CircleCollider2D> ().enabled = false;
 	}
 }
