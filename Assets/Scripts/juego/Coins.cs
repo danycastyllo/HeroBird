@@ -17,7 +17,7 @@ public class Coins : MonoBehaviour {
     {
 	    
 		AudioPool.Instance.PlaySound(coinSound); // intancia la funcion que crea el numero de objetos para los audios de las monedas
-		GameController.monedasDePartida += 1f; // aumenta el contador de monedas obtenidas en la partida actual
+		GameController.runCoins += 1; // aumenta el contador de monedas obtenidas en la partida actual
 
 		// activa la animacion de obtencion de la moneda y luego la destruye
 		MonedaC = true;

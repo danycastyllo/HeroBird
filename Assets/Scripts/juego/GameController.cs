@@ -23,8 +23,8 @@ public class GameController : MonoBehaviour {
 	float sali;
 	public static float Score = 0;
 	public static float record = 0; 
-	public static float monedas = 0;
-	public static float monedasDePartida = 0;
+	public static int playerCoins = 0; // monedas totales
+	public static int runCoins = 0; // monedas en la partida 
 
 	public TextMesh Monedas;
 	public TextMesh score;
@@ -43,7 +43,7 @@ public class GameController : MonoBehaviour {
 	void Start () {
         Menu ();
 		sali = Random.Range (30f, 50f);
-		monedas = PlayerPrefs.GetFloat ("monedas");
+		playerCoins = PlayerPrefs.GetInt ("PlayerCoins");
 		record = PlayerPrefs.GetFloat ("record");
 		AudioListener.volume = PlayerPrefs.GetInt ("Sound"); // devuelve el playerprefs del sonido para determinar si esta mute
 	}
@@ -51,12 +51,11 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 		score.text = "" + Score;
-		Monedas.text = "" + monedasDePartida;
+		Monedas.text = "" + runCoins;
 		DatosRecord.text = "" + record;
-		DatosMonedas.text = "" + monedas;
-		MonedasTienda.text = "" + monedas;
+		DatosMonedas.text = "" + playerCoins;
 		marcadorOver.text = "" + Score;
-		monedasOver.text = "" + monedasDePartida;
+		monedasOver.text = "" + runCoins;
 
 	}
 	void LateUpdate ()
@@ -76,7 +75,7 @@ public class GameController : MonoBehaviour {
 	}
 	void Menu ()	
 	{
-		monedasDePartida = 0;
+		runCoins = 0;
 		state = State.Menu;
 
 		// 각 오브젝트를 무효 상태로 한다
@@ -131,8 +130,8 @@ public class GameController : MonoBehaviour {
 		StartCoroutine (restartt ());
 		CancelInvoke ("metr");
 		state = State.GameOver;
-		monedas += monedasDePartida; // suma las monedas ganadas en la partida al total de monedas obtenidas
-		PlayerPrefs.SetFloat ("monedas", monedas); // guarda el acumulado de monedas (en playerprefs)
+		playerCoins += runCoins; // suma las monedas ganadas en la partida al total de monedas obtenidas
+		PlayerPrefs.SetInt ("PlayerCoins", playerCoins); // guarda el acumulado de monedas (en playerprefs)
 
 		if (Score > record) {
 			record = Score;

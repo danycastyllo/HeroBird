@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Ira : MonoBehaviour {
 
@@ -23,13 +24,17 @@ public class Ira : MonoBehaviour {
 	{
 	}
 	void OnMouseDown(){
-		if (devuelvis) {
-			Bajar = true;
-			subeBaja.SetBool ("bajar", Bajar);
-		}
-		transform.localScale = new Vector3 (0.8f, 0.8f, 1f);
-		abrir.SetActive (true);
-		StartCoroutine (cierris ());
+		SceneManager.LoadScene("Store");
+		// if (devuelvis) {
+		// 	Bajar = true;
+		// 	subeBaja.SetBool ("bajar", Bajar);
+		// }
+		// transform.localScale = new Vector3 (0.8f, 0.8f, 1f);
+		// abrir.SetActive (true);
+		// StartCoroutine (cierris ());
+	}
+	void ira(string lugar){
+		SceneManager.LoadScene(lugar);
 	}
 	IEnumerator cierris(){
 		yield return new WaitForSeconds(0.10f);

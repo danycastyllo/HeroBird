@@ -11,8 +11,6 @@ public class ControlBird : MonoBehaviour {
 	public float maxHeight;
 	public float flapVelocity;
 	public float relativeVelocityX;
-	public GameObject Pajaro;
-	public Rigidbody2D Halcon;
 
 	public bool volar;
 	public static bool Jugar = false;
@@ -72,6 +70,7 @@ public class ControlBird : MonoBehaviour {
 		// caundo muera se rota de pico abajo
 		if (isDead)
 		{
+			gameObject.GetComponent<Collider2D>().enabled = false;
 			targetAngle = -90.0f;
 		}
 		else
@@ -84,7 +83,7 @@ public class ControlBird : MonoBehaviour {
 		angle = Mathf.Lerp(angle, targetAngle, Time.deltaTime * 10.0f);
 
 		// Rotation의 반영
-		Pajaro.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, angle);
+		gameObject.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, angle);
 	}
 
 	void OnTriggerEnter2D (Collider2D col)
