@@ -17,6 +17,7 @@ public class ControlBird : MonoBehaviour {
 	public static bool Aleteo = false;
 	public bool move;
 	public Animator bird;
+	public ParticleSystem auraBird;
 	// Use this for initialization
 	void Start(){
 	}
@@ -44,8 +45,8 @@ public class ControlBird : MonoBehaviour {
 			if (Aleteo == true) {
 				// flutter sound
 				FindAnyObjectByType<AudioManager>().Play("Flutter");
+				Flap ();
 			}
-			Flap ();
 		} else {
 			volar = false;
 		}
@@ -54,6 +55,7 @@ public class ControlBird : MonoBehaviour {
 
 	public void Flap ()
 	{
+		if (!move) {auraBird.Play();}
 		volar = true;
 		if(isDead) return;
 		// 중력을 받지 않을 때는 조작하지 않는다

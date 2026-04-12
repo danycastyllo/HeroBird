@@ -19,6 +19,7 @@ public class GameController : MonoBehaviour {
 	public GameObject[] Tramp;
     public GameObject[] Gameover;
 	public static bool animBird = false;
+	public AuraLoader auraLoader;
 
 	float sali;
 	public static float Score = 0;
@@ -37,6 +38,7 @@ public class GameController : MonoBehaviour {
 	public SpriteRenderer SelectedBird; //the current skin of the selected bird
 	public SpriteRenderer SelectedPoop; //the current skin of the selected poop
 	public static int SeccNum;
+
 
 
 	// Use this for initialization
@@ -97,11 +99,12 @@ public class GameController : MonoBehaviour {
 
 	void GameStart ()
 	{
+		birdScript.move = true;
 		animBird = true;
 		state = State.Play;
 		birdScript.SetSteerActive(true);
 		StartCoroutine (prime ());
-		birdScript.move = true;
+
         if(ComienzoTubos.OnPerilla == true) {
             Tramp[8].SetActive(true);
         }
@@ -116,6 +119,8 @@ public class GameController : MonoBehaviour {
 		Tramp [9].GetComponent<LimiteObjectIzq> ().enabled = true;
 		Tramp [10].SetActive (false);
 		Tramp [11].GetComponent<LimiteObjArriba> ().enabled = true;
+		FindAnyObjectByType<AudioManager>().Stop("OpeningScene");
+		FindAnyObjectByType<AudioManager>().Play("BackgroundMusic");
         Tramp[3].GetComponent<LimiteObjArriba>().enabled = true;
         //alert.enabled = true;
 
@@ -125,6 +130,7 @@ public class GameController : MonoBehaviour {
 
 	void GameOver ()
 	{
+		FindAnyObjectByType<AudioManager>().Stop("BackgroundMusic");
 		FindAnyObjectByType<AudioManager>().Play("Cuack"); // death sound
 		animBird = false;
 		StartCoroutine (restartt ());

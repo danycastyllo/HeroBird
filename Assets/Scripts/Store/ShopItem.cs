@@ -1,29 +1,27 @@
 using UnityEngine;
 using UnityEngine.UI;
-using static ShopManager;
 
 public class ShopItem : MonoBehaviour
 {
-    public Image icon; // Imagen del ítem (se actualizará dinámicamente)
-    public Image imgToSelect; // Imagen del ítem (se actualizará dinámicamente)
-    public Text priceText; // Precio mostrado
-    public Button buyButton; // Botón de compra
+    public Image icon;
+    public Image imgToSelect;
+    public Text priceText;
+    public Button buyButton;
 
-    public Sprite originalSprite; // Sprite original sin contorno
-    public Sprite selectedSprite; // Sprite con contorno
+    public Sprite originalSprite;
+    public Sprite selectedSprite;
+
     private ShopManager shopManager;
-    private object itemData; // Puede ser Character o Aura
-
+    private object itemData;
 
     public void Setup<T>(T item, ShopManager manager)
     {
-        itemData = item; // Aquí se asigna el dato del ítem
+        itemData = item;
         shopManager = manager;
 
         if (item is CharacterData character)
         {
-            icon.sprite = character.icon; // Asignar sprite original
-
+            icon.sprite = character.icon;
             priceText.text = character.price.ToString();
             buyButton.interactable = !character.isUnlocked;
             buyButton.onClick.AddListener(() => BuyCharacter(character));
@@ -31,22 +29,41 @@ public class ShopItem : MonoBehaviour
         else if (item is AuraData aura)
         {
             icon.sprite = aura.icon;
+            icon.color  = GetStartColor(aura).Evaluate(0f, Random.value);
+            
+            // ✅ Fuerza tamaño fijo para el icono del aura
+            icon.rectTransform.sizeDelta = new Vector2(100f, 100f);
 
             priceText.text = aura.price.ToString();
             buyButton.interactable = !aura.isUnlocked;
             buyButton.onClick.AddListener(() => BuyAura(aura));
         }
 
-        // Añade funcionalidad de selección
         imgToSelect.GetComponent<Button>().onClick.AddListener(() => SelectItem());
+    }
+
+    private ParticleSystem.MinMaxGradient GetStartColor(AuraData aura)
+    {
+        switch (aura.colorMode)
+        {
+            case AuraColorMode.Constant:
+                return new ParticleSystem.MinMaxGradient(aura.colorA);
+            case AuraColorMode.RandomBetweenTwo:
+                return new ParticleSystem.MinMaxGradient(aura.colorA, aura.colorB);
+            case AuraColorMode.Gradient:
+                return new ParticleSystem.MinMaxGradient(aura.colorGradient);
+            default:
+                return new ParticleSystem.MinMaxGradient(aura.colorA);
+        }
     }
 
     private void BuyCharacter(CharacterData character)
     {
-        if (shopManager.playerCoins >= character.price && !character.isUnlocked){
+        if (shopManager.playerCoins >= character.price && !character.isUnlocked)
+        {
             shopManager.TryBuyCharacter(character);
-            buyButton.interactable = !character.isUnlocked;
             DisableBuyButton();
+            SelectItem(); // ✅ selecciona automáticamente al comprar
         }
         else
         {
@@ -56,34 +73,33 @@ public class ShopItem : MonoBehaviour
 
     private void BuyAura(AuraData aura)
     {
-        shopManager.TryBuyAura(aura);
-        buyButton.interactable = !aura.isUnlocked;
-    }
-
-    // Desactivar el botón de compra
-    public void DisableBuyButton()
-    {
-        if (buyButton != null)
+        if (shopManager.playerCoins >= aura.price && !aura.isUnlocked)
         {
-            buyButton.gameObject.SetActive(false);
+            shopManager.TryBuyAura(aura);
+            DisableBuyButton();
+            SelectItem(); // ✅ selecciona automáticamente al comprar
+        }
+        else
+        {
+            Debug.Log("No tienes suficientes monedas o el aura ya está desbloqueada.");
         }
     }
 
-    // Método llamado al seleccionar el ítem
-    private void SelectItem()
+    public void DisableBuyButton()
     {
-        shopManager.SelectShopItem(this); 
+        if (buyButton != null)
+            buyButton.gameObject.SetActive(false);
     }
 
-    // Cambiar sprite según selección
+    private void SelectItem()
+    {
+        shopManager.SelectShopItem(this);
+    }
+
     public void SetSelectedState(bool isSelected)
     {
         imgToSelect.sprite = isSelected ? selectedSprite : originalSprite;
     }
 
-
-    public object ItemData // Propiedad pública de solo lectura
-    {
-        get { return itemData; }
-    }
+    public object ItemData => itemData;
 }
