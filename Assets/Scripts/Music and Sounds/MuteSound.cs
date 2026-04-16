@@ -10,7 +10,7 @@ public class SpriteButton : MonoBehaviour
 
     private void Start()
     {
-        isMuted = PlayerPrefs.GetInt ("Sound") == 0 ? true : false; //devuelve el playerprefs del sonido para saber que icono poner
+        isMuted = PlayerPrefs.GetInt(GameKeys.Sound) == 0 ? true : false; //devuelve el playerprefs del sonido para saber que icono poner
         UpdateIcon(); // Asegúrate de que el sprite inicial sea correcto
     }
 
@@ -19,7 +19,7 @@ public class SpriteButton : MonoBehaviour
         // Alterna el estado del audio al hacer clic
         isMuted = !isMuted;
         AudioListener.volume = isMuted ? 0 : 1;
-        PlayerPrefs.SetInt ("Sound", isMuted ? 0 : 1); //guarda la variable de mute en un playerprefs
+        PlayerPrefs.SetInt(GameKeys.Sound, isMuted ? 0 : 1); //guarda la variable de mute en un playerprefs
         UpdateIcon();
     }
 

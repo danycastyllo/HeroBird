@@ -65,9 +65,9 @@ public class ShopManager : MonoBehaviour
         selectedShopItem.SetSelectedState(true);
 
         if (shopItem.ItemData is CharacterData character)
-            PlayerPrefs.SetString("SelectedCharacterName", character.itemName);
+            PlayerPrefs.SetString(GameKeys.SelectedCharacter, character.itemName);
         else if (shopItem.ItemData is AuraData aura)
-            PlayerPrefs.SetString("SelectedAuraName", aura.itemName);
+            PlayerPrefs.SetString(GameKeys.SelectedAura, aura.itemName);
 
         PlayerPrefs.Save();
     }
@@ -77,7 +77,7 @@ public class ShopManager : MonoBehaviour
         if (playerCoins >= character.price && !character.isUnlocked)
         {
             playerCoins -= character.price;
-            PlayerPrefs.SetInt("PlayerCoins", playerCoins);
+            PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins);
             UnlockItem(character, "Character");
             UpdateCoinsUI();
         }
@@ -92,7 +92,7 @@ public class ShopManager : MonoBehaviour
         if (playerCoins >= aura.price && !aura.isUnlocked)
         {
             playerCoins -= aura.price;
-            PlayerPrefs.SetInt("PlayerCoins", playerCoins);
+            PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins);
             UnlockItem(aura, "Aura");
             UpdateCoinsUI();
         }
@@ -105,7 +105,10 @@ public class ShopManager : MonoBehaviour
     private void UnlockItem(ShopItemData item, string prefix)
     {
         item.isUnlocked = true;
-        PlayerPrefs.SetInt($"{prefix}_{item.itemName}_Unlocked", 1);
+        string key = prefix == "Character" 
+            ? string.Format(GameKeys.CharacterUnlocked, item.itemName)
+            : string.Format(GameKeys.AuraUnlocked, item.itemName);
+        PlayerPrefs.SetInt(key, 1);
         PlayerPrefs.Save();
         Debug.Log($"{prefix} {item.itemName} desbloqueado.");
     }
@@ -113,15 +116,15 @@ public class ShopManager : MonoBehaviour
     private void LoadUnlockedItems()
     {
         foreach (var character in characters)
-            character.isUnlocked = PlayerPrefs.GetInt($"Character_{character.itemName}_Unlocked", 0) == 1;
+            character.isUnlocked = PlayerPrefs.GetInt(string.Format(GameKeys.CharacterUnlocked, character.itemName), 0) == 1;
 
         foreach (var aura in auras)
-            aura.isUnlocked = PlayerPrefs.GetInt($"Aura_{aura.itemName}_Unlocked", 0) == 1;
+            aura.isUnlocked = PlayerPrefs.GetInt(string.Format(GameKeys.AuraUnlocked, aura.itemName), 0) == 1;
     }
 
     private void UpdateCoinsUI()
     {
-        playerCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
+        playerCoins = PlayerPrefs.GetInt(GameKeys.PlayerCoins, 0);
         coinsText.text = playerCoins.ToString();
     }
 
@@ -156,14 +159,14 @@ public class ShopManager : MonoBehaviour
     {
         if (characterShopPanel.activeSelf)
         {
-            string savedName = PlayerPrefs.GetString("SelectedCharacterName", "");
+            string savedName = PlayerPrefs.GetString(GameKeys.SelectedCharacter, "");
             var item = FindShopItemByName(characterContentPanel, 
                 string.IsNullOrEmpty(savedName) ? defaultCharacterName : savedName);
             if (item != null) SelectShopItem(item);
         }
         else if (auraShopPanel.activeSelf)
         {
-            string savedName = PlayerPrefs.GetString("SelectedAuraName", "");
+            string savedName = PlayerPrefs.GetString(GameKeys.SelectedAura, "");
             var item = FindShopItemByName(auraContentPanel,
                 string.IsNullOrEmpty(savedName) ? defaultAuraName : savedName);
             if (item != null) SelectShopItem(item);

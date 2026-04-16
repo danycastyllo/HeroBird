@@ -45,9 +45,9 @@ public class GameController : MonoBehaviour {
 	void Start () {
         Menu ();
 		sali = Random.Range (30f, 50f);
-		playerCoins = PlayerPrefs.GetInt ("PlayerCoins");
-		record = PlayerPrefs.GetFloat ("record");
-		AudioListener.volume = PlayerPrefs.GetInt ("Sound"); // devuelve el playerprefs del sonido para determinar si esta mute
+		playerCoins = PlayerPrefs.GetInt(GameKeys.PlayerCoins);
+		record = PlayerPrefs.GetFloat(GameKeys.Record);
+		AudioListener.volume = PlayerPrefs.GetInt(GameKeys.Sound); // devuelve el playerprefs del sonido para determinar si esta mute
 	}
 	
 	// Update is called once per frame
@@ -137,11 +137,11 @@ public class GameController : MonoBehaviour {
 		CancelInvoke ("metr");
 		state = State.GameOver;
 		playerCoins += runCoins; // suma las monedas ganadas en la partida al total de monedas obtenidas
-		PlayerPrefs.SetInt ("PlayerCoins", playerCoins); // guarda el acumulado de monedas (en playerprefs)
+		PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins); // guarda el acumulado de monedas (en playerprefs)
 
 		if (Score > record) {
 			record = Score;
-			PlayerPrefs.SetFloat ("record", record);
+			PlayerPrefs.SetFloat(GameKeys.Record, record);
 		}
 
 	}

@@ -1,40 +1,40 @@
 using UnityEditor;
 using UnityEngine;
 
-public class AssetReferenceFinder : MonoBehaviour
+public class AssetReferenceFinder
 {
-    [MenuItem("Tools/Find Asset References")]
+    [MenuItem("HeroBird/Find References for Selected Asset")]
     public static void FindAssetReferences()
     {
-        // Mostrar ventana de selección de asset
         string path = AssetDatabase.GetAssetPath(Selection.activeObject);
         if (string.IsNullOrEmpty(path))
         {
-            Debug.LogError("Por favor, selecciona un asset en el proyecto.");
+            Debug.LogError("Selecciona un asset en el panel Project primero.");
             return;
         }
 
-        Debug.Log($"Buscando referencias para el asset: {path}");
+        Debug.Log($"=== Buscando referencias para: {path} ===");
 
-        // Obtener todos los posibles activos que puedan referenciar este asset
-        string[] allAssets = AssetDatabase.GetAllAssetPaths();
-
-        // Verificar dónde se utiliza
-        foreach (string asset in allAssets)
+        int count = 0;
+        foreach (string asset in AssetDatabase.GetAllAssetPaths())
         {
-            if (AssetDatabase.IsValidFolder(asset)) continue; // Ignorar carpetas
+            if (AssetDatabase.IsValidFolder(asset)) continue;
+            if (asset == path) continue;
 
-            string[] dependencies = AssetDatabase.GetDependencies(asset, true);
-            foreach (string dependency in dependencies)
+            foreach (string dependency in AssetDatabase.GetDependencies(asset, true))
             {
                 if (dependency == path)
                 {
-                    Debug.Log($"El asset está referenciado en: {asset}");
+                    Debug.Log($"Referenciado en: {asset}");
+                    count++;
                     break;
                 }
             }
         }
 
-        Debug.Log("Búsqueda completada.");
+        if (count == 0)
+            Debug.LogWarning($"Ningún asset referencia a: {path} — candidato a eliminar");
+        else
+            Debug.Log($"Total de referencias encontradas: {count}");
     }
 }

@@ -22,7 +22,7 @@ public class SkinManagerGlobal : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
-        string selectedName = PlayerPrefs.GetString("SelectedCharacterName", "");
+        string selectedName = PlayerPrefs.GetString(GameKeys.SelectedCharacter, "");
         ApplySkin(selectedName);
     }
 

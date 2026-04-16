@@ -2,62 +2,134 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 
-public class UnusedAssetsFinder : MonoBehaviour
+public class UnusedAssetsFinder
 {
-    [MenuItem("Tools/Find Unused Assets")]
+    // Carpetas que nunca se reportan como no utilizadas
+    private static readonly string[] excludedPaths = new string[]
+    {
+        "Assets/Editor/",
+        "Assets/Plugins/",
+        "Assets/MobileDependencyResolver/",
+        "Assets/StreamingAssets/",
+        "Assets/Resources/",
+    };
+
+    // Extensiones que nunca se reportan (configuración de build, docs)
+    private static readonly string[] excludedExtensions = new string[]
+    {
+        ".gradle", ".md", ".txt", ".json", ".xml",
+        ".pdb", ".dll", ".asmdef", ".asmref"
+    };
+
+    [MenuItem("HeroBird/Find Unused Assets")]
     public static void FindUnusedAssets()
     {
-        Debug.Log("Buscando recursos no utilizados...");
-        
-        // Lista de todos los activos en el proyecto
-        string[] allAssets = AssetDatabase.GetAllAssetPaths();
+        Debug.Log("=== HeroBird — Buscando assets no utilizados ===");
 
-        // Conjunto de activos utilizados explícitamente
         HashSet<string> usedAssets = new HashSet<string>();
 
-        // Buscar todos los prefabs, escenas y materiales utilizados en el proyecto
-        string[] scenePaths = AssetDatabase.FindAssets("t:Scene");
-        string[] prefabPaths = AssetDatabase.FindAssets("t:Prefab");
-
-        // Recolectar dependencias de escenas
-        foreach (string guid in scenePaths)
+        // 1. Dependencias de Escenas
+        foreach (string guid in AssetDatabase.FindAssets("t:Scene"))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            string[] dependencies = AssetDatabase.GetDependencies(path, true);
-            foreach (string dependency in dependencies)
-            {
-                usedAssets.Add(dependency);
-            }
+            foreach (string dep in AssetDatabase.GetDependencies(path, true))
+                usedAssets.Add(dep);
         }
 
-        // Recolectar dependencias de prefabs
-        foreach (string guid in prefabPaths)
+        // 2. Dependencias de Prefabs
+        foreach (string guid in AssetDatabase.FindAssets("t:Prefab"))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            string[] dependencies = AssetDatabase.GetDependencies(path, true);
-            foreach (string dependency in dependencies)
-            {
-                usedAssets.Add(dependency);
-            }
+            foreach (string dep in AssetDatabase.GetDependencies(path, true))
+                usedAssets.Add(dep);
         }
 
-        // Comparar todos los activos con los utilizados
+        // 3. Dependencias de ScriptableObjects (CharacterData, AuraData, ShopItemData)
+        foreach (string guid in AssetDatabase.FindAssets("t:ScriptableObject"))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            foreach (string dep in AssetDatabase.GetDependencies(path, true))
+                usedAssets.Add(dep);
+        }
+
+        // 4. Dependencias de Materiales
+        foreach (string guid in AssetDatabase.FindAssets("t:Material"))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            foreach (string dep in AssetDatabase.GetDependencies(path, true))
+                usedAssets.Add(dep);
+        }
+
+        // Comparar contra todos los assets del proyecto
         List<string> unusedAssets = new List<string>();
-        foreach (string asset in allAssets)
+        foreach (string asset in AssetDatabase.GetAllAssetPaths())
         {
-            if (asset.StartsWith("Assets/") && !usedAssets.Contains(asset) && !AssetDatabase.IsValidFolder(asset))
-            {
-                unusedAssets.Add(asset);
-            }
+            if (!asset.StartsWith("Assets/")) continue;
+            if (AssetDatabase.IsValidFolder(asset)) continue;
+            if (usedAssets.Contains(asset)) continue;
+            if (IsExcluded(asset)) continue;
+
+            unusedAssets.Add(asset);
         }
 
-        // Mostrar resultados
-        Debug.Log($"Total de recursos en el proyecto: {allAssets.Length}");
-        Debug.Log($"Total de recursos utilizados: {usedAssets.Count}");
-        Debug.Log($"Total de recursos no utilizados: {unusedAssets.Count}");
-        foreach (string unused in unusedAssets)
+        // Agrupar resultados por tipo
+        List<string> sprites   = new List<string>();
+        List<string> audio     = new List<string>();
+        List<string> scripts   = new List<string>();
+        List<string> others    = new List<string>();
+
+        foreach (string asset in unusedAssets)
         {
-            Debug.Log("Recurso no utilizado: " + unused);
+            string ext = System.IO.Path.GetExtension(asset).ToLower();
+            if (ext == ".png" || ext == ".jpg" || ext == ".psd")
+                sprites.Add(asset);
+            else if (ext == ".mp3" || ext == ".wav" || ext == ".ogg")
+                audio.Add(asset);
+            else if (ext == ".cs")
+                scripts.Add(asset);
+            else
+                others.Add(asset);
         }
+
+        // Mostrar resultados agrupados
+        Debug.Log($"Assets no utilizados: {unusedAssets.Count} total");
+        Debug.Log($"  Sprites/Texturas: {sprites.Count}");
+        Debug.Log($"  Audio: {audio.Count}");
+        Debug.Log($"  Scripts: {scripts.Count} (verificar en VSCode, el scanner no es confiable para .cs)");
+        Debug.Log($"  Otros: {others.Count}");
+
+        if (sprites.Count > 0)
+        {
+            Debug.Log("--- SPRITES NO UTILIZADOS ---");
+            foreach (string s in sprites) Debug.Log(s);
+        }
+        if (audio.Count > 0)
+        {
+            Debug.Log("--- AUDIO NO UTILIZADO ---");
+            foreach (string s in audio) Debug.Log(s);
+        }
+        if (scripts.Count > 0)
+        {
+            Debug.Log("--- SCRIPTS (verificar manualmente en VSCode) ---");
+            foreach (string s in scripts) 
+                Debug.Log($"[VERIFICAR MANUALMENTE] {s}");
+        }
+        if (others.Count > 0)
+        {
+            Debug.Log("--- OTROS ---");
+            foreach (string s in others) Debug.Log(s);
+        }
+    }
+
+    private static bool IsExcluded(string path)
+    {
+        foreach (string excluded in excludedPaths)
+            if (path.StartsWith(excluded)) return true;
+
+        string ext = System.IO.Path.GetExtension(path).ToLower();
+        foreach (string excludedExt in excludedExtensions)
+            if (ext == excludedExt) return true;
+
+        return false;
     }
 }
