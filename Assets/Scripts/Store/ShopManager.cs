@@ -5,36 +5,46 @@ using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
+    // ── Enums ─────────────────────────────────────────────────────────────────
+    public enum ShopTab { Characters, Auras }
+
+    // ── Datos ─────────────────────────────────────────────────────────────────
     public List<CharacterData> characters;
     public List<AuraData> auras;
 
+    // ── Referencias UI ────────────────────────────────────────────────────────
     public Transform characterContentPanel;
     public Transform auraContentPanel;
-
     public Button characterTabButton;
     public Button auraTabButton;
-
     public GameObject characterItemPrefab;
     public Text coinsText;
-    public int playerCoins = 0;
-
     public GameObject characterShopPanel;
     public GameObject auraShopPanel;
 
-    private ShopItem selectedShopItem;
-
+    // ── Configuración ─────────────────────────────────────────────────────────
     public string defaultCharacterName = "bird1";
-    public string defaultAuraName = "DefaultAura";
+    public string defaultAuraName      = "DefaultAura";
 
-    private void Start()
+    // ── Privadas ──────────────────────────────────────────────────────────────
+    ShopItem selectedShopItem;
+    int playerCoins;
+    public int PlayerCoins => playerCoins;
+
+    static readonly Color colorTabActive   = Color.white;
+    static readonly Color colorTabInactive = new Color(0.9f, 0.9f, 0.9f, 1f);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    void Start()
     {
         LoadUnlockedItems();
         UpdateCoinsUI();
         GenerateStoreItems();
-        SwitchTab("Characters");
+        SwitchTab(ShopTab.Characters);
     }
 
-    private void GenerateStoreItems()
+    // ── Generación de items ───────────────────────────────────────────────────
+    void GenerateStoreItems()
     {
         PopulateShop(characters.Cast<ShopItemData>().ToList(), characterContentPanel);
         PopulateShop(auras.Cast<ShopItemData>().ToList(), auraContentPanel);
@@ -48,7 +58,7 @@ public class ShopManager : MonoBehaviour
         foreach (var item in items)
         {
             GameObject newItem = Instantiate(characterItemPrefab, contentPanel);
-            ShopItem shopItem = newItem.GetComponent<ShopItem>();
+            ShopItem shopItem  = newItem.GetComponent<ShopItem>();
             shopItem.Setup(item, this);
 
             if (item.isUnlocked)
@@ -56,6 +66,7 @@ public class ShopManager : MonoBehaviour
         }
     }
 
+    // ── Selección y compra ────────────────────────────────────────────────────
     public void SelectShopItem(ShopItem shopItem)
     {
         if (selectedShopItem != null)
@@ -72,79 +83,71 @@ public class ShopManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    public void TryBuyCharacter(CharacterData character)
+    public void TryBuyCharacter(CharacterData character) => TryBuy(character, "Character");
+    public void TryBuyAura(AuraData aura)               => TryBuy(aura, "Aura");
+
+    void TryBuy(ShopItemData item, string prefix)
     {
-        if (playerCoins >= character.price && !character.isUnlocked)
-        {
-            playerCoins -= character.price;
-            PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins);
-            UnlockItem(character, "Character");
-            UpdateCoinsUI();
-        }
-        else
-        {
-            Debug.Log("No tienes suficientes monedas o el personaje ya está desbloqueado.");
-        }
+        if (item.isUnlocked || playerCoins < item.price) return;
+
+        playerCoins -= item.price;
+        PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins);
+        UnlockItem(item, prefix);
+        UpdateCoinsUI();
     }
 
-    public void TryBuyAura(AuraData aura)
-    {
-        if (playerCoins >= aura.price && !aura.isUnlocked)
-        {
-            playerCoins -= aura.price;
-            PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins);
-            UnlockItem(aura, "Aura");
-            UpdateCoinsUI();
-        }
-        else
-        {
-            Debug.Log("No tienes suficientes monedas o el aura ya está desbloqueada.");
-        }
-    }
-
-    private void UnlockItem(ShopItemData item, string prefix)
+    void UnlockItem(ShopItemData item, string prefix)
     {
         item.isUnlocked = true;
-        string key = prefix == "Character" 
+        string key = prefix == "Character"
             ? string.Format(GameKeys.CharacterUnlocked, item.itemName)
             : string.Format(GameKeys.AuraUnlocked, item.itemName);
         PlayerPrefs.SetInt(key, 1);
         PlayerPrefs.Save();
-        Debug.Log($"{prefix} {item.itemName} desbloqueado.");
     }
 
-    private void LoadUnlockedItems()
+    // ── Persistencia ──────────────────────────────────────────────────────────
+    void LoadUnlockedItems()
     {
         foreach (var character in characters)
-            character.isUnlocked = PlayerPrefs.GetInt(string.Format(GameKeys.CharacterUnlocked, character.itemName), 0) == 1;
+            character.isUnlocked = PlayerPrefs.GetInt(
+                string.Format(GameKeys.CharacterUnlocked, character.itemName), 0) == 1;
 
         foreach (var aura in auras)
-            aura.isUnlocked = PlayerPrefs.GetInt(string.Format(GameKeys.AuraUnlocked, aura.itemName), 0) == 1;
+            aura.isUnlocked = PlayerPrefs.GetInt(
+                string.Format(GameKeys.AuraUnlocked, aura.itemName), 0) == 1;
     }
 
-    private void UpdateCoinsUI()
+    void UpdateCoinsUI()
     {
-        playerCoins = PlayerPrefs.GetInt(GameKeys.PlayerCoins, 0);
+        playerCoins    = PlayerPrefs.GetInt(GameKeys.PlayerCoins, 0);
         coinsText.text = playerCoins.ToString();
     }
 
-    public void SwitchTab(string tabName)
+    // ── Tabs ──────────────────────────────────────────────────────────────────
+    public void SwitchTab(ShopTab tab)
     {
-        characterShopPanel.SetActive(tabName == "Characters");
-        auraShopPanel.SetActive(tabName == "Auras");
-        SetActiveTab(tabName == "Characters" ? characterTabButton : auraTabButton);
+        bool isCharacters = tab == ShopTab.Characters;
+        characterShopPanel.SetActive(isCharacters);
+        auraShopPanel.SetActive(!isCharacters);
+        SetActiveTab(isCharacters ? characterTabButton : auraTabButton);
         LoadSelectedItem();
     }
 
-    private void SetActiveTab(Button selectedTab)
+    // Mantener compatibilidad con botones de UI que llaman por string
+    public void SwitchToCharacters() => SwitchTab(ShopTab.Characters);
+    public void SwitchToAuras()      => SwitchTab(ShopTab.Auras);
+
+    void SetActiveTab(Button activeTab)
     {
-        characterTabButton.image.color = new Color(0.9f, 0.9f, 0.9f, 1f);
-        auraTabButton.image.color = new Color(0.9f, 0.9f, 0.9f, 1f);
-        selectedTab.image.color = Color.white;
-        selectedTab.transform.SetSiblingIndex(selectedTab.transform.parent.childCount - 2);
+        characterTabButton.image.color = colorTabInactive;
+        auraTabButton.image.color      = colorTabInactive;
+        activeTab.image.color          = colorTabActive;
+        activeTab.transform.SetSiblingIndex(activeTab.transform.parent.childCount - 2);
     }
 
-    private ShopItem FindShopItemByName(Transform contentPanel, string itemName)
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    ShopItem FindShopItemByName(Transform contentPanel, string itemName)
     {
         foreach (Transform child in contentPanel)
         {
@@ -155,12 +158,12 @@ public class ShopManager : MonoBehaviour
         return null;
     }
 
-    private void LoadSelectedItem()
+    void LoadSelectedItem()
     {
         if (characterShopPanel.activeSelf)
         {
             string savedName = PlayerPrefs.GetString(GameKeys.SelectedCharacter, "");
-            var item = FindShopItemByName(characterContentPanel, 
+            var item = FindShopItemByName(characterContentPanel,
                 string.IsNullOrEmpty(savedName) ? defaultCharacterName : savedName);
             if (item != null) SelectShopItem(item);
         }

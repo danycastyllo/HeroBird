@@ -3,39 +3,47 @@ using UnityEngine;
 
 public class SkinManagerGlobal : MonoBehaviour
 {
+    // ── Singleton ─────────────────────────────────────────────────────────────
     public static SkinManagerGlobal Instance;
 
+    // ── Datos ─────────────────────────────────────────────────────────────────
     [Header("Todos los personajes del juego")]
     public List<CharacterData> characters;
 
-    private SpriteRenderer spriteRenderer;
-    private Animator animator;
-    private Sprite[] activeSpritesheet;
+    // ── Privadas ──────────────────────────────────────────────────────────────
+    SpriteRenderer spriteRenderer;
+    Animator animator;
+    Sprite[] activeSpritesheet;
 
-    private void Awake()
-    {
-        Instance = this;
-    }
+    const string idleStateName = "Idle";
 
-    private void Start()
+    // ─────────────────────────────────────────────────────────────────────────
+    void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance       = this;
         spriteRenderer = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
-
-        string selectedName = PlayerPrefs.GetString(GameKeys.SelectedCharacter, "");
-        ApplySkin(selectedName);
+        animator       = GetComponent<Animator>();
     }
 
-    private void LateUpdate()
+    void Start()
+    {
+        string savedName = PlayerPrefs.GetString(GameKeys.SelectedCharacter, "");
+        ApplySkin(savedName);
+    }
+
+    void LateUpdate()
     {
         if (activeSpritesheet == null || animator == null) return;
-        
-        // ✅ Deja de sobreescribir cuando el pájaro muere
         if (ControlBird.isDead) return;
 
         AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
 
-        if (state.IsName("idle")) // reemplaza por tu nombre exacto de idle
+        if (state.IsName(idleStateName))
         {
             spriteRenderer.sprite = activeSpritesheet[0];
             return;
@@ -45,14 +53,21 @@ public class SkinManagerGlobal : MonoBehaviour
         frame = Mathf.Clamp(frame, 0, activeSpritesheet.Length - 1);
         spriteRenderer.sprite = activeSpritesheet[frame];
     }
+
+    // ── API pública ───────────────────────────────────────────────────────────
     public void ApplySkin(string skinName)
     {
+        if (characters == null || characters.Count == 0)
+        {
+            Debug.LogWarning("SkinManagerGlobal: la lista de personajes está vacía.");
+            return;
+        }
+
         CharacterData found = null;
 
         if (!string.IsNullOrEmpty(skinName))
             found = characters.Find(c => c.itemName == skinName);
 
-        // Si no hay selección guardada, usa el primero sin warning
         if (found == null)
             found = characters[0];
 

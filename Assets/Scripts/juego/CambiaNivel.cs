@@ -1,79 +1,79 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class CambiaNivel : MonoBehaviour {
+public class CambiaNivel : MonoBehaviour
+{
+    // ── Referencias ───────────────────────────────────────────────────────────
+    public GameController gameController;
+    public TextMesh levelNumberText;
+    public GameObject[] levels;
+    public GameObject endGameScreen;
+    public GameObject finalBird;
 
-    // Use this for initialization
-    private int[] NivSuperados;
-    public GameController niveli;
-    public TextMesh NiveNum;
-    public int nivelNum = 0;
+    // ── Estado ────────────────────────────────────────────────────────────────
+    public int currentLevelIndex = 0;
+    public int[] completedLevels;
 
-    public GameObject endgame;
-    public GameObject finbird;
+    // ── Privadas ──────────────────────────────────────────────────────────────
+    int randomLevel;
+    const int maxLevels     = 10;
+    const float levelDelay  = 22f;
 
-    public GameObject[] Niveles;
-    private int Nivel = 0;
-	private int nivelRand;
-    public int[] nivPasados;
-    private int i;
-    //public float ts = 5f;
-
-    void Start () {
-        //nivelRand = Random.Range(0, 10);
-        //Nivel = nivelRand;
-        InvokeRepeating("ComprobarNivel", 0f, 22f);
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        if (nivelNum > 10)
-        {
-            finbird.transform.Translate(1f * 2f * Time.deltaTime, 0, 0);
-        }
-
-        }
-
-    void ComprobarNivel()
+    // ─────────────────────────────────────────────────────────────────────────
+    void Start()
     {
-        //Time.timeScale = ts;
-        nivelRand = Random.Range(0, 10);
-        niveli.firstLevel.SetActive(false);
+        InvokeRepeating(nameof(CheckAndLoadNextLevel), 0f, levelDelay);
+    }
 
-        if (nivelNum < 10)
+    void Update()
+    {
+        if (currentLevelIndex > maxLevels)
+            finalBird.transform.Translate(2f * Time.deltaTime, 0, 0);
+    }
+
+    // ── Lógica de niveles ─────────────────────────────────────────────────────
+
+    // Selecciona un nivel aleatorio que no haya sido jugado recientemente
+    void CheckAndLoadNextLevel()
+    {
+        randomLevel = Random.Range(0, maxLevels);
+        gameController.firstLevel.SetActive(false);
+
+        if (currentLevelIndex < maxLevels)
         {
-            for (i = 0; i < 10; i++)
+            for (int i = 0; i < maxLevels; i++)
             {
-                if (nivPasados[i] == nivelRand)
+                if (completedLevels[i] == randomLevel)
                 {
-                    nivelRand = Random.Range(0, 10);
+                    randomLevel = Random.Range(0, maxLevels);
                     i = -1;
                 }
             }
         }
-            i = 0;
-        nivPasados[nivelNum] = nivelRand;
-            nivelNum++;
 
-        Nivel = nivelRand;
-        NiveNum.text = "" + nivelNum;
-        niveli.firstLevel = Niveles[Nivel];
-        niveli.firstLevel.SetActive(true);
-        if(nivelNum > 10)
+        completedLevels[currentLevelIndex] = randomLevel;
+        currentLevelIndex++;
+
+        levelNumberText.text          = "" + currentLevelIndex;
+        gameController.firstLevel     = levels[randomLevel];
+        gameController.firstLevel.SetActive(true);
+
+        if (currentLevelIndex > maxLevels)
         {
-            NiveNum.gameObject.SetActive(false);
-            niveli.firstLevel.SetActive(false);
-            StartCoroutine(deletesorpresa());
+            levelNumberText.gameObject.SetActive(false);
+            gameController.firstLevel.SetActive(false);
+            StartCoroutine(ShowEndSequence());
         }
     }
-    IEnumerator deletesorpresa()
+
+    // Secuencia final — muestra pantalla de fin y carga escena final
+    IEnumerator ShowEndSequence()
     {
         yield return new WaitForSeconds(8f);
-        nivelNum = 9;
-        finbird.SetActive(false);
-        endgame.SetActive(true);
+        currentLevelIndex = 9;
+        finalBird.SetActive(false);
+        endGameScreen.SetActive(true);
         yield return new WaitForSeconds(1.19f);
         SceneManager.LoadScene("Final");
     }
