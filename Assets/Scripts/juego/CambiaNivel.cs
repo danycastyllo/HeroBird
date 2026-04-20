@@ -40,7 +40,7 @@ public class CambiaNivel : MonoBehaviour {
     {
         //Time.timeScale = ts;
         nivelRand = Random.Range(0, 10);
-        niveli.Tramp[0].SetActive(false);
+        niveli.firstLevel.SetActive(false);
 
         if (nivelNum < 10)
         {
@@ -59,12 +59,12 @@ public class CambiaNivel : MonoBehaviour {
 
         Nivel = nivelRand;
         NiveNum.text = "" + nivelNum;
-        niveli.Tramp[0] = Niveles[Nivel];
-        niveli.Tramp[0].SetActive(true);
+        niveli.firstLevel = Niveles[Nivel];
+        niveli.firstLevel.SetActive(true);
         if(nivelNum > 10)
         {
             NiveNum.gameObject.SetActive(false);
-            niveli.Tramp[0].SetActive(false);
+            niveli.firstLevel.SetActive(false);
             StartCoroutine(deletesorpresa());
         }
     }

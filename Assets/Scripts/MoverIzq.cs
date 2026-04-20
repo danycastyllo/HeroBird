@@ -21,7 +21,7 @@ public class MoverIzq : MonoBehaviour
         if (ColM.gameObject.name == "Bird")
         {
             GetComponent<AudioSource>().Play();
-            GameController.Score += 1f;
+            GameController.currentScore += 1f;
         }
     }
 }

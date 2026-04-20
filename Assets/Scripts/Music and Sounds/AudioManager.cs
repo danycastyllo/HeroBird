@@ -1,14 +1,12 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
     public Sound[] sounds;
 
-    //Use this for initialization
-    void Awake () {
+    void Awake()
+    {
         foreach (Sound s in sounds)
         {
             s.source = gameObject.AddComponent<AudioSource>();
@@ -19,35 +17,44 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    private void Start() {
+    private void Start()
+    {
         Play("OpeningScene");
     }
 
-    //play sound
-    public void Play (string name)
+    public void Play(string name)
     {
         Sound s = Find(name);
-        s.source.Play();        
+        if (s == null) return;
+        s.source.Play();
     }
-    public void Stop (string name)
+
+    public void Stop(string name)
     {
         Sound s = Find(name);
-        s.source.Stop();        
+        if (s == null) return;
+        s.source.Stop();
     }
-    public Sound Find (string name)
+
+    public Sound Find(string name)
     {
-        Sound s = Array.Find(sounds, Sound => Sound.Name == name);
-        if (s == null){
-            Debug.LogWarning("Sound: " + name + " not found!");
-        }
-        return s;    
+        Sound s = Array.Find(sounds, sound => sound.Name == name);
+        if (s == null)
+            Debug.LogWarning($"AudioManager: sonido '{name}' no encontrado.");
+        return s;
     }
-    public void PlaySoundCoins ()
+
+    // Reproduce el sonido de moneda usando la primera fuente disponible
+    // para permitir superposición de sonidos (polyphony)
+    public void PlaySoundCoins()
     {
         Sound s = Find("TakeCoin");
+        if (s == null) return;
+
         for (int i = Array.IndexOf(sounds, s); i < sounds.Length; i++)
         {
-            if(!sounds[i].source.isPlaying){
+            if (!sounds[i].source.isPlaying)
+            {
                 sounds[i].source.Play();
                 return;
             }

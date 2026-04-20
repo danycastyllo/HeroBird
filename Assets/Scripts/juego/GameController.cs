@@ -1,185 +1,195 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-//                                                                                tipo de juego completar palabras letra por letra en 3 caminos y sumas y restas
-public class GameController : MonoBehaviour {
 
-	enum State
-	{
-		Menu,
-		Play,
-		GameOver
-	} 
+public class GameController : MonoBehaviour
+{
+    // ── Estado ──────────────────────────────────────────────────────────────
+    enum GameState { Menu, Playing, GameOver }
+    GameState currentState;
 
-	State state;
+    // ── Referencias de escena ────────────────────────────────────────────────
+    public ControlBird birdScript;
+    public AuraLoader auraLoader;
 
-	public ControlBird birdScript;
-	public GameObject[] Tramp;
-    public GameObject[] Gameover;
-	public static bool animBird = false;
-	public AuraLoader auraLoader;
+    // Obstáculos y generadores
+    public GameObject firstLevel;
+    public GameObject flappyPipe;
+    public GameObject pipeGenerator;
+    public GameObject rock;
 
-	float sali;
-	public static float Score = 0;
-	public static float record = 0; 
-	public static int playerCoins = 0; // monedas totales
-	public static int runCoins = 0; // monedas en la partida 
+    // Límites del mundo
+    public GameObject floor;
+    public GameObject mountains;
 
-	public TextMesh Monedas;
-	public TextMesh score;
-	public TextMesh DatosMonedas;
-	public TextMesh DatosRecord;
-	public TextMesh MonedasTienda;
-	public TextMesh marcadorOver;
-	public TextMesh monedasOver;
+    // UI de gameplay
+    public GameObject menuObject;
+    public GameObject titleObject;
+    public GameObject dataObject;
+    public GameObject valuesObject;
+    public GameObject levelNumberObject;
 
-	public SpriteRenderer SelectedBird; //the current skin of the selected bird
-	public SpriteRenderer SelectedPoop; //the current skin of the selected poop
-	public static int SeccNum;
+    // Pantallas de Game Over
+    public GameObject[] gameOverPanels;
 
+    // ── UI Textos ────────────────────────────────────────────────────────────
+    public TextMesh textScore;
+    public TextMesh textRunCoins;
+    public TextMesh textTotalCoins;
+    public TextMesh textRecord;
+    public TextMesh textGameOverScore;
+    public TextMesh textGameOverCoins;
 
+    // ── Estado global del juego ──────────────────────────────────────────────
+    public static bool isBirdAnimating = false;
+    public static float currentScore   = 0;
+    public static float record         = 0;
+    public static int totalCoins       = 0;
+    public static int runCoins         = 0;
 
-	// Use this for initialization
-	void Start () {
-        Menu ();
-		sali = Random.Range (30f, 50f);
-		playerCoins = PlayerPrefs.GetInt(GameKeys.PlayerCoins);
-		record = PlayerPrefs.GetFloat(GameKeys.Record);
-		AudioListener.volume = PlayerPrefs.GetInt(GameKeys.Sound); // devuelve el playerprefs del sonido para determinar si esta mute
-	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
-		score.text = "" + Score;
-		Monedas.text = "" + runCoins;
-		DatosRecord.text = "" + record;
-		DatosMonedas.text = "" + playerCoins;
-		marcadorOver.text = "" + Score;
-		monedasOver.text = "" + runCoins;
+    // ── Privadas ─────────────────────────────────────────────────────────────
+    AudioManager audioManager;
+    float randomSpawnDelay;
 
-	}
-	void LateUpdate ()
-	{
-		switch (state)
-		{
-		case State.Menu: 
-			if (Presionar.hacer == "jugar") GameStart();
-			break;
-		case State.Play:
-			if (birdScript.IsDead()) GameOver();
-			break;
-		case State.GameOver:
-			if (Presionar.hacer == "restart") Reload();
-			break;
-		}
-	}
-	void Menu ()	
-	{
-		runCoins = 0;
-		state = State.Menu;
+    // ────────────────────────────────────────────────────────────────────────
+    void Awake()
+    {
+        audioManager = FindAnyObjectByType<AudioManager>();
+    }
 
-		// 각 오브젝트를 무효 상태로 한다
-		birdScript.SetSteerActive(false);
+    void Start()
+    {
+        randomSpawnDelay     = Random.Range(30f, 50f);
+        totalCoins           = PlayerPrefs.GetInt(GameKeys.PlayerCoins);
+        record               = PlayerPrefs.GetFloat(GameKeys.Record);
+        AudioListener.volume = PlayerPrefs.GetInt(GameKeys.Sound);
+        EnterMenuState();
+    }
 
-		Tramp[0].SetActive(false);
-		//Tramp[1].SetActive(false);
-		//Tramp[2].SetActive(false);
-		//Tramp[3].SetActive(false);
-		Tramp[7].SetActive(false);
+    void FixedUpdate()
+    {
+        textScore.text         = "" + currentScore;
+        textRunCoins.text      = "" + runCoins;
+        textRecord.text        = "" + record;
+        textTotalCoins.text    = "" + totalCoins;
+        textGameOverScore.text = "" + currentScore;
+        textGameOverCoins.text = "" + runCoins;
+    }
 
-		Tramp[8].SetActive(false);
-		Tramp [4].GetComponent<LimiteObjectIzq> ().enabled = false;
-		Tramp [5].GetComponent<LimiteObjectIzq> ().enabled = false;
-		Tramp [6].GetComponent<LimiteObjectIzq> ().enabled = false;
-
-		//alert.enabled = false;
-	}
-
-	void GameStart ()
-	{
-		birdScript.move = true;
-		animBird = true;
-		state = State.Play;
-		birdScript.SetSteerActive(true);
-		StartCoroutine (prime ());
-
-        if(ComienzoTubos.OnPerilla == true) {
-            Tramp[8].SetActive(true);
+    void LateUpdate()
+    {
+        switch (currentState)
+        {
+            case GameState.Menu:
+                if (Presionar.hacer == "jugar") EnterPlayState();
+                break;
+            case GameState.Playing:
+                if (birdScript.IsDead()) EnterGameOverState();
+                break;
+            case GameState.GameOver:
+                if (Presionar.hacer == "restart") ReloadScene();
+                break;
         }
+    }
+
+    // ── Estados ───────────────────────────────────────────────────────────────
+    void EnterMenuState()
+    {
+        runCoins     = 0;
+        currentState = GameState.Menu;
+
+        birdScript.SetSteerActive(false);
+        firstLevel.SetActive(false);
+        valuesObject.SetActive(false);
+        pipeGenerator.SetActive(false);
+        floor.GetComponent<LimiteObjectIzq>().enabled     = false;
+        mountains.GetComponent<LimiteObjectIzq>().enabled = false;
+        rock.GetComponent<LimiteObjectIzq>().enabled      = false;
+    }
+
+    void EnterPlayState()
+    {
+        birdScript.move = true;
+        isBirdAnimating = true;
+        currentState    = GameState.Playing;
+
+        birdScript.SetSteerActive(true);
+        StartCoroutine(WaitAndStartSpawning());
+
+        if (ComienzoTubos.OnPerilla)
+            pipeGenerator.SetActive(true);
         else
         {
-            Tramp[7].SetActive(true);
-            Tramp[12].SetActive(true);
+            valuesObject.SetActive(true);
+            levelNumberObject.SetActive(true);
         }
-		Tramp [4].GetComponent<LimiteObjectIzq> ().enabled = true;
-		Tramp [5].GetComponent<LimiteObjectIzq> ().enabled = true;
-		Tramp [6].GetComponent<LimiteObjectIzq> ().enabled = true;
-		Tramp [9].GetComponent<LimiteObjectIzq> ().enabled = true;
-		Tramp [10].SetActive (false);
-		Tramp [11].GetComponent<LimiteObjArriba> ().enabled = true;
-		FindAnyObjectByType<AudioManager>().Stop("OpeningScene");
-		FindAnyObjectByType<AudioManager>().Play("BackgroundMusic");
-        Tramp[3].GetComponent<LimiteObjArriba>().enabled = true;
-        //alert.enabled = true;
 
-        
+        floor.GetComponent<LimiteObjectIzq>().enabled      = true;
+        mountains.GetComponent<LimiteObjectIzq>().enabled  = true;
+        rock.GetComponent<LimiteObjectIzq>().enabled       = true;
+        menuObject.GetComponent<LimiteObjectIzq>().enabled = true;
+        titleObject.SetActive(false);
+        dataObject.GetComponent<LimiteObjArriba>().enabled = true;
+        flappyPipe.GetComponent<LimiteObjArriba>().enabled = true;
+
+        audioManager.Stop("OpeningScene");
+        audioManager.Play("BackgroundMusic");
         birdScript.Flap();
-	}
+    }
 
-	void GameOver ()
-	{
-		FindAnyObjectByType<AudioManager>().Stop("BackgroundMusic");
-		FindAnyObjectByType<AudioManager>().Play("Cuack"); // death sound
-		animBird = false;
-		StartCoroutine (restartt ());
-		CancelInvoke ("metr");
-		state = State.GameOver;
-		playerCoins += runCoins; // suma las monedas ganadas en la partida al total de monedas obtenidas
-		PlayerPrefs.SetInt(GameKeys.PlayerCoins, playerCoins); // guarda el acumulado de monedas (en playerprefs)
+    void EnterGameOverState()
+    {
+        audioManager.Stop("BackgroundMusic");
+        audioManager.Play("Cuack");
 
-		if (Score > record) {
-			record = Score;
-			PlayerPrefs.SetFloat(GameKeys.Record, record);
-		}
+        isBirdAnimating = false;
+        currentState    = GameState.GameOver;
 
-	}
-	void Reload ()
-	{
-		ControlBird.isDead = false;
-            ComienzoTubos.OnPerilla = false;
-		//Application.LoadLevel(Application.loadedLevel);  //5.2
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);   //5.3
-	}
-	IEnumerator tiem(){
-		yield return new WaitForSeconds (5f);
-		//Tramp[3].SetActive(true);
-		yield return new WaitForSeconds (sali);
-		//Tramp[1].SetActive(true);
-	}
-	IEnumerator prime(){
-		yield return new WaitForSeconds (3f);
-		Destroy (Tramp [6]);
-        Destroy(Tramp[3]);
-        if (ComienzoTubos.OnPerilla != true)
+        CancelInvoke("metr");
+        StartCoroutine(ShowGameOverPanels());
+
+        totalCoins += runCoins;
+        PlayerPrefs.SetInt(GameKeys.PlayerCoins, totalCoins);
+
+        if (currentScore > record)
         {
-            Tramp[0].SetActive(true);
+            record = currentScore;
+            PlayerPrefs.SetFloat(GameKeys.Record, record);
         }
-		StartCoroutine (tiem ());
-		//Tramp[2].SetActive(true);
-		//Tramp[8].SetActive(true);
-		Tramp [9].SetActive (false);
-		Tramp [11].SetActive (false);
-		birdScript.move = false;
-		yield return new WaitForSeconds (20f);
-	}
+    }
 
-	IEnumerator restartt(){
-		yield return new WaitForSeconds (1f);
-		Gameover [0].SetActive (true);
-		yield return new WaitForSeconds (2.1f);
-		Gameover [1].GetComponent<Animator> ().enabled = false;
-	}
+    void ReloadScene()
+    {
+        ControlBird.isDead      = false;
+        ComienzoTubos.OnPerilla = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
+    // ── Coroutines ────────────────────────────────────────────────────────────
+
+    // Espera 3 segundos antes de activar el spawn de obstáculos
+    IEnumerator WaitAndStartSpawning()
+    {
+        yield return new WaitForSeconds(3f);
+        Destroy(rock);
+        Destroy(flappyPipe);
+
+        if (!ComienzoTubos.OnPerilla)
+            firstLevel.SetActive(true);
+
+        menuObject.SetActive(false);
+        dataObject.SetActive(false);
+        birdScript.move = false;
+
+        yield return new WaitForSeconds(20f);
+    }
+
+    // Muestra los paneles de Game Over con delay entre ellos
+    IEnumerator ShowGameOverPanels()
+    {
+        yield return new WaitForSeconds(1f);
+        gameOverPanels[0].SetActive(true);
+        yield return new WaitForSeconds(2.1f);
+        gameOverPanels[1].GetComponent<Animator>().enabled = false;
+    }
 }
