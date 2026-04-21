@@ -28,6 +28,7 @@ public class GameController : MonoBehaviour
     public GameObject dataObject;
     public GameObject valuesObject;
     public GameObject levelNumberObject;
+    public GameObject pauseObject;
 
     // Pantallas de Game Over
     public GameObject[] gameOverPanels;
@@ -173,6 +174,7 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(3f);
         Destroy(rock);
         Destroy(flappyPipe);
+        pauseObject.SetActive(true);
 
         if (!ComienzoTubos.OnPerilla)
             firstLevel.SetActive(true);
@@ -180,8 +182,6 @@ public class GameController : MonoBehaviour
         menuObject.SetActive(false);
         dataObject.SetActive(false);
         birdScript.move = false;
-
-        yield return new WaitForSeconds(20f);
     }
 
     // Muestra los paneles de Game Over con delay entre ellos

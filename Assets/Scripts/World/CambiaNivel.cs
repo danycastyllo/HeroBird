@@ -18,7 +18,7 @@ public class CambiaNivel : MonoBehaviour
     // ── Privadas ──────────────────────────────────────────────────────────────
     int randomLevel;
     const int maxLevels     = 10;
-    const float levelDelay  = 22f;
+    const float levelDelay  = 23f;
 
     // ─────────────────────────────────────────────────────────────────────────
     void Start()
