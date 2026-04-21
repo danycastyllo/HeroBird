@@ -6,7 +6,7 @@ public class Ajustes : MonoBehaviour {
 
 	public GameObject Opciones;
 	public GameObject juego;
-	public static bool segur;
+	public static bool isOpen;
 	// Use this for initialization
 	void Start () {
 		
@@ -20,7 +20,7 @@ public class Ajustes : MonoBehaviour {
 		}
 	}
 	void OnMouseDown(){
-		if (!segur) {
+		if (!isOpen) {
 			transform.localScale = new Vector3 (0.8f, 0.8f, 1f);
 			StartCoroutine (opc ());
 		}
@@ -33,10 +33,10 @@ public class Ajustes : MonoBehaviour {
 		yield return new WaitForSeconds (0.99f);
 		//Opciones.GetComponent<Animator> ().enabled = false;
 		juego.SetActive (false);
-		segur = true;
+		isOpen = true;
 	}
 	IEnumerator termi(){
 		yield return new WaitForSeconds (0.97f);
-		segur = false;
+		isOpen = false;
 	}
 }
