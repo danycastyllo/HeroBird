@@ -4,8 +4,7 @@ public class ControlBird : MonoBehaviour
 {
     // ── Estado ───────────────────────────────────────────────────────────────
     public static bool isDead    = false;
-    public static bool isPlaying = false;
-    public static bool canFlap   = false;
+    public bool canFlap   = false;
 
     // ── Configuración ─────────────────────────────────────────────────────────
     public float maxHeight;
@@ -106,12 +105,9 @@ public class ControlBird : MonoBehaviour
 
     void OnMouseDown()
     {
-        isPlaying = true;
-        canFlap   = true;
     }
 
     void OnMouseUp()
     {
-        isPlaying = false;
     }
 }

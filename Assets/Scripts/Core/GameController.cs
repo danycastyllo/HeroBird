@@ -26,7 +26,7 @@ public class GameController : MonoBehaviour
     public GameObject menuObject;
     public GameObject titleObject;
     public GameObject dataObject;
-    public GameObject valuesObject;
+    public GameObject MoneyObject;
     public GameObject levelNumberObject;
     public GameObject pauseObject;
 
@@ -101,7 +101,7 @@ public class GameController : MonoBehaviour
 
         birdScript.SetSteerActive(false);
         firstLevel.SetActive(false);
-        valuesObject.SetActive(false);
+        this.GetComponent<CambiaNivel>().enabled     = false;
         pipeGenerator.SetActive(false);
         floor.GetComponent<LimiteObjectIzq>().enabled     = false;
         mountains.GetComponent<LimiteObjectIzq>().enabled = false;
@@ -110,6 +110,7 @@ public class GameController : MonoBehaviour
 
     void EnterPlayState()
     {
+        birdScript.canFlap = true;
         birdScript.move = true;
         isBirdAnimating = true;
         currentState    = GameState.Playing;
@@ -121,8 +122,9 @@ public class GameController : MonoBehaviour
             pipeGenerator.SetActive(true);
         else
         {
-            valuesObject.SetActive(true);
+            this.GetComponent<CambiaNivel>().enabled     = true;
             levelNumberObject.SetActive(true);
+            MoneyObject.SetActive(true);
         }
 
         floor.GetComponent<LimiteObjectIzq>().enabled      = true;
